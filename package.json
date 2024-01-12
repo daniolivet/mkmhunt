@@ -4,13 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev src/app.ts",
+    "dev": "ts-node-dev --inspect=9229 src/app.ts",
     "start": "tsc && build/index.js"
   },
   "keywords": [],
   "author": "daniolivet",
   "license": "ISC",
   "dependencies": {
+    "@types/puppeteer": "^7.0.4",
     "node-telegram-bot-api": "^0.64.0",
     "puppeteer": "^21.7.0",
     "puppeteer-extra": "^3.3.6",
