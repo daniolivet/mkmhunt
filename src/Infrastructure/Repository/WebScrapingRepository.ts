@@ -2,13 +2,14 @@ import { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
+import { ScrapingData } from '../Types/WebScrapingRepository.type';
 import { IWebScrapingRepository } from '../../Domain/IWebScrapingRepository';
 
 puppeteer.use(StealthPlugin());
 
 export class WebScrapingRepository implements IWebScrapingRepository {
 
-    public async getData(url: string): Promise<any>
+    public async getData(url: string): Promise<ScrapingData>
     {
         try {
             url = url.replace('/es/', '/en/');
@@ -33,6 +34,7 @@ export class WebScrapingRepository implements IWebScrapingRepository {
 
         } catch (error) {
             console.error('Error:', error);
+            return Promise.reject(error);
         }
     }
 
@@ -41,9 +43,18 @@ export class WebScrapingRepository implements IWebScrapingRepository {
         return await page.$$eval('#table .col-offer .price-container .fw-bold', nodes => nodes.map(n => n.textContent ? n.textContent.replace(/€|,/g, '.').trim() : ''));
     }
 
+    /**
+     * Get the language of the card. Excluding Playset and Foil from the list.
+     *
+     * @param page Page
+     * @returns Promise<string[]>
+     */
     private async getCardLanguage(page: Page): Promise<string[]>
     {
-        return await page.$$eval('#table .col-sellerProductInfo .col-product .product-attributes > span[data-original-title] ', nodes => nodes.map(node => node.getAttribute('data-original-title') || ''));
+        const target: string = '#table .col-sellerProductInfo .col-product .product-attributes > span[data-original-title]';
+        let cardData: Array<string> = await page.$$eval(target, nodes => nodes.map(node => node.getAttribute('data-original-title') || ''));
+
+        return cardData.filter(value => value !== 'Playset' && value !== 'Foil');
     }
 
     private async getSellerCountry(page: Page): Promise<string[]>
