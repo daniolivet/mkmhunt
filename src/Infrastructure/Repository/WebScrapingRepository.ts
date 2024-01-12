@@ -2,11 +2,13 @@ import { Page } from 'puppeteer';
 import puppeteer from 'puppeteer-extra';
 import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
+import { IWebScrapingRepository } from '../../Domain/IWebScrapingRepository';
+
 puppeteer.use(StealthPlugin());
 
-export class WebScrapingRepository {
+export class WebScrapingRepository implements IWebScrapingRepository {
 
-    public async getData(url: string)
+    public async getData(url: string): Promise<any>
     {
         try {
             url = url.replace('/es/', '/en/');
@@ -20,14 +22,15 @@ export class WebScrapingRepository {
             let cardLanguage  = await this.getCardLanguage(page);
             let sellerCountry = await this.getSellerCountry(page);
 
-            console.log({
+            await browser.close();
+
+            return {
                 prices: prices,
                 lowestPrice: lowestPrice,
                 cardLanguage: cardLanguage,
                 sellerCountry: sellerCountry
-            });
+            };
 
-            await browser.close();
         } catch (error) {
             console.error('Error:', error);
         }
