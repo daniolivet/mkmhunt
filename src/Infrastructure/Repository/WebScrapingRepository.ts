@@ -9,6 +9,12 @@ puppeteer.use(StealthPlugin());
 
 export class WebScrapingRepository implements IWebScrapingRepository {
 
+    /**
+     * Get data from the web page doing Scraping method.
+     * 
+     * @param url string
+     * @returns Promise<ScrapingData>
+     */
     public async getData(url: string): Promise<ScrapingData>
     {
         try {
@@ -38,6 +44,12 @@ export class WebScrapingRepository implements IWebScrapingRepository {
         }
     }
 
+    /**
+     * Get prices of all offers.
+     * 
+     * @param page Page
+     * @returns Promise<string[]>
+     */
     private async getPrices(page: Page): Promise<string[]>
     {
         return await page.$$eval('#table .col-offer .price-container .fw-bold', nodes => nodes.map(n => n.textContent ? n.textContent.replace(/€|,/g, '.').trim() : ''));
@@ -57,8 +69,19 @@ export class WebScrapingRepository implements IWebScrapingRepository {
         return cardData.filter(value => value !== 'Playset' && value !== 'Foil');
     }
 
+    /**
+     * Get seller country.
+     * 
+     * @param page Page
+     * @returns Promise<string[]>
+     */
     private async getSellerCountry(page: Page): Promise<string[]>
     {
-        return await page.$$eval('#table .col-sellerProductInfo .col-seller .seller-name > span[data-bs-original-title]', nodes => nodes.map(node => node.getAttribute('data-bs-original-title') || ''));
+        const target: string = '#table .col-sellerProductInfo .col-seller .seller-name > span[data-bs-original-title]';
+        let sellerData = await page.$$eval(target, nodes => nodes.map(node => node.getAttribute('data-bs-original-title') || ''));
+
+        return sellerData
+                .filter(value => value.includes("Item location:"))
+                .map(value => value.replace('Item location: ', ''));
     }
 }
