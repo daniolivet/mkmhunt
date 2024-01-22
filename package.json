@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node-dev --inspect=9229 src/app.ts",
-    "start": "tsc && build/index.js"
+    "execute": "ts-node src/app.ts"
   },
   "keywords": [],
   "author": "daniolivet",
@@ -15,7 +15,8 @@
     "node-telegram-bot-api": "^0.64.0",
     "puppeteer": "^21.7.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2"
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "ts-node": "^10.9.2"
   },
   "devDependencies": {
     "@types/node-telegram-bot-api": "^0.64.2",
