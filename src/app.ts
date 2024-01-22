@@ -1,14 +1,22 @@
 import { IController } from "./Domain/IController";
 import { IWebScrapingRepository } from "./Domain/IWebScrapingRepository";
 
-import { GetCardOffersUseCase } from "./Application/GetCardOffersUseCase";
-import { GetCardOffersController } from "./Infrastructure/GetCardOffersController";
-import { WebScrapingRepository } from "./Infrastructure/Repository/WebScrapingRepository";
 import { ITelegramServices } from "./Domain/ITelegramServices";
+
 import { TelegramServices } from "./Infrastructure/Services/TelegramServices";
 
-const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
+import { WebScrapingRepository } from "./Infrastructure/Repository/WebScrapingRepository";
+
+import { GetCardOffersController } from "./Infrastructure/GetCardOffersController";
+import { GetCardOffersUseCase } from "./Application/GetCardOffersUseCase";
+
+// Services
 const telegramServices: ITelegramServices = new TelegramServices();
+
+// Repositories
+const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
+
+// Use cases
 const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(
     webScrapingRepository,
     telegramServices

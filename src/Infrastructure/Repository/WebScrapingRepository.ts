@@ -52,7 +52,7 @@ export class WebScrapingRepository implements IWebScrapingRepository {
      */
     private async getPrices(page: Page): Promise<string[]>
     {
-        return await page.$$eval('#table .col-offer .price-container .fw-bold', nodes => nodes.map(n => n.textContent ? n.textContent.replace(/€|,/g, '.').trim() : ''));
+        return await page.$$eval('#table .col-offer .price-container .fw-bold', nodes => nodes.map(n => n.textContent ? n.textContent.replace(",", ".").replace(" €", "").trim() : ''));
     }
 
     /**

@@ -1,6 +1,7 @@
 
 import { IController } from "../Domain/IController";
 import { GetCardOffersUseCase } from "../Application/GetCardOffersUseCase";
+import JsonSearchesData from "../../searches.json";
 
 export class GetCardOffersController implements IController {
 
@@ -13,7 +14,7 @@ export class GetCardOffersController implements IController {
      */
     public execute(): void
     {
-        this.getCardOffersUseCase.execute();
+        this.getCardOffersUseCase.execute(JsonSearchesData);
     }
 
 }
