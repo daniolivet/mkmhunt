@@ -31,10 +31,7 @@ export class GetCardOffersUseCase {
 
             if ( parseFloat(scrapinData.lowestPrice) <= parseFloat(card.price) ) {
                 this.telegramServices.sendMessage(this.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
-                continue;
             }
-
-            this.telegramServices.sendMessage('No card found with the price you were looking for. \n Check it out: ' + card.url);
         };
     }
 
@@ -45,7 +42,7 @@ export class GetCardOffersUseCase {
      * @param scrapinData 
      * @returns boolean
      */
-    private getCardCoincidence(card: TargetCardData, scrapinData: ScrapingData): boolean {
+    private getCardCoincidence(card: TargetCardData, scrapinData: ScrapingData): void {
         const cardIndex = scrapinData.sellerCountry.findIndex((sellerCountry: string, index: number) => {
             return (
                 sellerCountry === card.country &&
@@ -56,11 +53,7 @@ export class GetCardOffersUseCase {
 
         if (cardIndex !== -1) {
             this.telegramServices.sendMessage(this.getMessage(scrapinData, card.url, scrapinData.prices[cardIndex]));
-            return true;
         }
-
-        this.telegramServices.sendMessage('No card found with the price you were looking for. \n Check it out: ' + card.url);
-        return false;
     }
 
     /**
@@ -73,7 +66,7 @@ export class GetCardOffersUseCase {
     private getMessage(data: ScrapingData, url: string, price: string = ''): string
     {
         let lowestPriceCardInfo: string = 'Lowest price card: \n\n - Price: ' + data.lowestPrice + '€\n - Language: ' + data.cardLanguage[0] + '\n - Country: ' + data.sellerCountry[0];
-        let myResearch: string = 'A card was founded with the price you were looking for. \n Price founded => '+ price +'€. \n Check it out: ' + url;
+        let myResearch: string = 'A card was founded with the price you were looking for. \n Price founded: '+ price +' €. \n\n Check it out: ' + url;
 
         return lowestPriceCardInfo + '\n\n' + myResearch;
     }
