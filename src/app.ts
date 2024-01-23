@@ -1,3 +1,6 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
 import { IController } from "./Domain/IController";
 import { IWebScrapingRepository } from "./Domain/IWebScrapingRepository";
 
