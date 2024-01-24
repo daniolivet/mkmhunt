@@ -5,6 +5,7 @@ import {
     SearchesJson,
     TargetCardData
 } from "../Infrastructure/Types/SearchesJson.types";
+import fs from 'fs';
 
 export class GetCardOffersUseCase {
 
@@ -14,11 +15,7 @@ export class GetCardOffersUseCase {
     ){}
 
     public async execute(jsonData: SearchesJson): Promise<void>
-    {
-        if ( !jsonData.active ) {
-            return;
-        }
-        
+    {   
         for( let card of jsonData.cards ){
             let scrapinData: ScrapingData = await this.webScrapingRepository.getData(card.url);
             let sellerCountryFilterIsActive = this.ensureFilterIsActive(card.url, 'sellerCountry');
@@ -30,7 +27,7 @@ export class GetCardOffersUseCase {
             }
 
             if ( parseFloat(scrapinData.lowestPrice) <= parseFloat(card.price) ) {
-                this.telegramServices.sendMessage(this.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
+                this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
             }
         };
     }
@@ -52,23 +49,8 @@ export class GetCardOffersUseCase {
         });
 
         if (cardIndex !== -1) {
-            this.telegramServices.sendMessage(this.getMessage(scrapinData, card.url, scrapinData.prices[cardIndex]));
+            this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.prices[cardIndex]));
         }
-    }
-
-    /**
-     * Get message for Telegram.
-     * 
-     * @param data 
-     * @param url 
-     * @returns string
-     */
-    private getMessage(data: ScrapingData, url: string, price: string = ''): string
-    {
-        let lowestPriceCardInfo: string = 'Lowest price card: \n\n - Price: ' + data.lowestPrice + '€\n - Language: ' + data.cardLanguage[0] + '\n - Country: ' + data.sellerCountry[0];
-        let myResearch: string = 'A card was founded with the price you were looking for. \n Price founded: '+ price +' €. \n\n Check it out: ' + url;
-
-        return lowestPriceCardInfo + '\n\n' + myResearch;
     }
 
     /**
