@@ -25,7 +25,7 @@ export class WebScrapingRepository implements IWebScrapingRepository {
             await page.goto(url);
 
             let prices        = await this.getPrices(page);
-            let lowestPrice   = Math.min(...prices.map(price => parseFloat(price))).toFixed(2);
+            let lowestPrice    = Math.min(...prices.map(price => parseFloat(price.replace(/\.(?=\d{3})/g, '')))).toFixed(2);
             let cardLanguage  = await this.getCardLanguage(page);
             let sellerCountry = await this.getSellerCountry(page);
 
