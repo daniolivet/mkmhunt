@@ -12,17 +12,25 @@ import { WebScrapingRepository } from "./Infrastructure/Repository/WebScrapingRe
 
 import { GetCardOffersController } from "./Infrastructure/GetCardOffersController";
 import { GetCardOffersUseCase } from "./Application/GetCardOffersUseCase";
+import { SearchesJsonRepository } from './Infrastructure/Repository/SearchesJsonRepository';
+import { ISearchesJsonRepository } from './Domain/ISearchesJsonRepository';
+import { DateTimeServices } from './Infrastructure/Services/DateTimeServices';
+import { IDateTimeServices } from './Domain/IDateTimeServices';
 
 // Services
 const telegramServices: ITelegramServices = new TelegramServices();
+const dateTimeServices: IDateTimeServices = new DateTimeServices();
 
 // Repositories
 const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
+const searchesJsonRepository: ISearchesJsonRepository = new SearchesJsonRepository();
 
 // Use cases
 const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(
     webScrapingRepository,
-    telegramServices
+    searchesJsonRepository,
+    telegramServices,
+    dateTimeServices
 );
 const controller: IController = new GetCardOffersController(getCardOffersUseCase);
 

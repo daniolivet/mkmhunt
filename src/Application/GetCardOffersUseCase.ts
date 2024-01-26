@@ -2,32 +2,40 @@ import { ITelegramServices } from "../Domain/ITelegramServices";
 import { IWebScrapingRepository } from "../Domain/IWebScrapingRepository";
 import { ScrapingData } from "../Infrastructure/Types/WebScrapingRepository.type";
 import {
-    SearchesJson,
     TargetCardData
 } from "../Infrastructure/Types/SearchesJson.types";
-import fs from 'fs';
+import { ISearchesJsonRepository } from "../Domain/ISearchesJsonRepository";
+import { IDateTimeServices } from "../Domain/IDateTimeServices";
 
 export class GetCardOffersUseCase {
 
     public constructor(
         private readonly webScrapingRepository: IWebScrapingRepository,
-        private readonly telegramServices: ITelegramServices
+        private readonly searcherJsonRepository: ISearchesJsonRepository,
+        private readonly telegramServices: ITelegramServices,
+        private readonly dateTimeServices: IDateTimeServices
     ){}
 
-    public async execute(jsonData: SearchesJson): Promise<void>
+    public async execute(): Promise<void>
     {   
+        let currentDate = this.dateTimeServices.getCurrentDate();
+        let jsonData = this.searcherJsonRepository.getJsonData();
+        
         for( let card of jsonData.cards ){
             let scrapinData: ScrapingData = await this.webScrapingRepository.getData(card.url);
             let sellerCountryFilterIsActive = this.ensureFilterIsActive(card.url, 'sellerCountry');
             let languageFilterIsActive = this.ensureFilterIsActive(card.url, 'language');
-            
+            jsonData.updated = currentDate;
+
             if ( !sellerCountryFilterIsActive && !languageFilterIsActive ) {
                 this.getCardCoincidence(card, scrapinData);
+                this.searcherJsonRepository.setData(jsonData);
                 continue;
             }
 
             if ( parseFloat(scrapinData.lowestPrice) <= parseFloat(card.price) ) {
                 this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
+                this.searcherJsonRepository.setData(jsonData);
             }
         };
     }
