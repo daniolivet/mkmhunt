@@ -1,6 +1,6 @@
-import { TargetCardData } from "../Infrastructure/Types/SearchesJson.types"
+import { SearchesJson } from "../Infrastructure/Types/SearchesJson.types"
 
 export interface ISearchesJsonRepository { 
     getJsonData(): any
-    setData(json: TargetCardData): void
+    setData(json: SearchesJson): void
 }

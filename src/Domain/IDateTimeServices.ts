@@ -1,4 +1,4 @@
 export interface IDateTimeServices { 
-    getCurrentDate(): string;
+    getCurrentDate(): Date;
     getDifferenceInHours(dateOne: Date, dateTwo: Date): number;
 }

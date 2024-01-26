@@ -1,7 +1,7 @@
 import JsonSearchesData from "../../../searches.json";
+import { SearchesJson } from "../Types/SearchesJson.types";
 import { ISearchesJsonRepository } from "../../Domain/ISearchesJsonRepository";
 import fs from 'fs';
-import { TargetCardData } from "../Types/SearchesJson.types";
 
 export class SearchesJsonRepository implements ISearchesJsonRepository {
     
@@ -22,7 +22,7 @@ export class SearchesJsonRepository implements ISearchesJsonRepository {
      * @param json TargetCardData
      * @returns void
      */
-    public setData(json: TargetCardData): void
+    public setData(json: SearchesJson): void
     {
         fs.writeFile('searches.json', JSON.stringify(json, null, 2), (err) => {
             if (err) throw err;

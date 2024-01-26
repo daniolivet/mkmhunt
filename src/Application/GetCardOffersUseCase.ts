@@ -1,11 +1,12 @@
 import { ITelegramServices } from "../Domain/ITelegramServices";
+import { IDateTimeServices } from "../Domain/IDateTimeServices";
 import { IWebScrapingRepository } from "../Domain/IWebScrapingRepository";
-import { ScrapingData } from "../Infrastructure/Types/WebScrapingRepository.type";
+import { ISearchesJsonRepository } from "../Domain/ISearchesJsonRepository";
 import {
+    SearchesJson,
     TargetCardData
 } from "../Infrastructure/Types/SearchesJson.types";
-import { ISearchesJsonRepository } from "../Domain/ISearchesJsonRepository";
-import { IDateTimeServices } from "../Domain/IDateTimeServices";
+import { ScrapingData } from "../Infrastructure/Types/WebScrapingRepository.type";
 
 export class GetCardOffersUseCase {
 
@@ -18,24 +19,35 @@ export class GetCardOffersUseCase {
 
     public async execute(): Promise<void>
     {   
-        let currentDate = this.dateTimeServices.getCurrentDate();
-        let jsonData = this.searcherJsonRepository.getJsonData();
+        let currentDate: Date = this.dateTimeServices.getCurrentDate();
+        let jsonData: SearchesJson = this.searcherJsonRepository.getJsonData();
         
         for( let card of jsonData.cards ){
             let scrapinData: ScrapingData = await this.webScrapingRepository.getData(card.url);
-            let sellerCountryFilterIsActive = this.ensureFilterIsActive(card.url, 'sellerCountry');
-            let languageFilterIsActive = this.ensureFilterIsActive(card.url, 'language');
-            jsonData.updated = currentDate;
+            let sellerCountryFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'sellerCountry');
+            let languageFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'language');
+
+            if (!card.updated) {
+                card.updated = currentDate.toISOString();
+                this.searcherJsonRepository.setData(jsonData);
+            }
+            let hoursDiff: number = this.dateTimeServices.getDifferenceInHours(currentDate, new Date(card.updated));
 
             if ( !sellerCountryFilterIsActive && !languageFilterIsActive ) {
-                this.getCardCoincidence(card, scrapinData);
-                this.searcherJsonRepository.setData(jsonData);
+                let coincidence: number = this.getCardCoincidence(card, scrapinData);
+
+                if (hoursDiff > 5 && coincidence !== -1) {
+                    card.updated = currentDate.toISOString();
+                    this.searcherJsonRepository.setData(jsonData);
+                    this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.prices[coincidence]));
+                }
                 continue;
             }
 
-            if ( parseFloat(scrapinData.lowestPrice) <= parseFloat(card.price) ) {
-                this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
+            if (parseFloat(scrapinData.lowestPrice) <= parseFloat(card.price) && hoursDiff > 5 ) {
+                card.updated = currentDate.toISOString();
                 this.searcherJsonRepository.setData(jsonData);
+                this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.lowestPrice));
             }
         };
     }
@@ -45,9 +57,9 @@ export class GetCardOffersUseCase {
      * 
      * @param card 
      * @param scrapinData 
-     * @returns boolean
+     * @returns number
      */
-    private getCardCoincidence(card: TargetCardData, scrapinData: ScrapingData): void {
+    private getCardCoincidence(card: TargetCardData, scrapinData: ScrapingData): number {
         const cardIndex = scrapinData.sellerCountry.findIndex((sellerCountry: string, index: number) => {
             return (
                 sellerCountry === card.country &&
@@ -56,9 +68,7 @@ export class GetCardOffersUseCase {
             );
         });
 
-        if (cardIndex !== -1) {
-            this.telegramServices.sendMessage(this.telegramServices.getMessage(scrapinData, card.url, scrapinData.prices[cardIndex]));
-        }
+        return cardIndex;
     }
 
     /**

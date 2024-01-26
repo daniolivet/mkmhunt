@@ -7,16 +7,9 @@ export class DateTimeServices implements IDateTimeServices {
      * 
      * @returns string
      */
-    public getCurrentDate(): string {
-        const currentDateTime = new Date();
-        const currentMonth = (currentDateTime.getMonth() + 1).toString().padStart(2, '0');
-        const currentDate = currentDateTime.getDate().toString().padStart(2, '0');
-        const currentHour = currentDateTime.getHours().toString().padStart(2, '0');
-        const currentMinutes = currentDateTime.getMinutes().toString().padStart(2, '0');
-
-        return `${currentDateTime.getFullYear()}-${currentMonth}-${currentDate} ${currentHour}:${currentMinutes}`;
+    public getCurrentDate(): Date {
+        return new Date();
     }
-
     /**
      * Get difference in hours.
      * 
