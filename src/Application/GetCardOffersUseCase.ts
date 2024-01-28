@@ -22,24 +22,20 @@ export class GetCardOffersUseCase {
     public async execute(): Promise<void>
     {   
         let jsonData: SearchesJson = this.searcherJsonRepository.getJsonData();
+        let currentDate: Date = this.dateTimeServices.getCurrentDate();
+        let currentDateISOString: string = currentDate.toISOString();
         
         for( let card of jsonData.cards ){
             this.scrapingData = await this.webScrapingRepository.getData(card.url);
             let sellerCountryFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'sellerCountry');
             let languageFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'language');
 
-            if (!card.updated) {
-                card.updated = this.dateTimeServices.getCurrentDate().toISOString();
-                this.searcherJsonRepository.setData(jsonData);
-            }
-            let hoursDiff: number = this.dateTimeServices.getDifferenceInHours(this.dateTimeServices.getCurrentDate(), new Date(card.updated));
+            let cardUpdated: TargetCardData = this.updateCard(card, jsonData, currentDateISOString);
+
+            let hoursDiff: number = this.dateTimeServices.getDifferenceInHours(this.dateTimeServices.getCurrentDate(), new Date(cardUpdated.updated ?? ''));
 
             if ( !sellerCountryFilterIsActive && !languageFilterIsActive ) {
-                let coincidence: number = this.getCardCoincidence(card);
-
-                if (hoursDiff > 2 && coincidence !== -1) {
-                    this.sendCoincidenceMessage(card, jsonData, this.scrapingData.prices[coincidence]);
-                }
+                this.checkCardCoincidence(card, jsonData, hoursDiff);
                 continue;
             }
 
@@ -47,6 +43,39 @@ export class GetCardOffersUseCase {
                 this.sendCoincidenceMessage(card, jsonData, this.scrapingData.lowestPrice);
             }
         };
+    }
+
+    /**
+     * Check card coincidence.
+     * 
+     * @param card 
+     * @param jsonData 
+     * @param hoursDiff 
+     */
+    private checkCardCoincidence(card: any, jsonData: SearchesJson, hoursDiff: number): void {
+        let coincidence: number = this.getCardCoincidence(card);
+
+        if (hoursDiff > 2 && coincidence !== -1) {
+            this.sendCoincidenceMessage(card, jsonData, this.scrapingData.prices[coincidence]);
+        }
+    }
+
+    /**
+     * Update card.
+     * 
+     * @param card 
+     * @param jsonData 
+     * @param currentDateISOString 
+     * @returns TargetCardData
+     */
+    private updateCard(card: any, jsonData: SearchesJson, currentDateISOString: string): TargetCardData {
+        if (!card.updated) {
+            card.updated = currentDateISOString;
+            this.searcherJsonRepository.setData(jsonData);
+            return card;
+        }
+
+        return card;
     }
 
     /**
