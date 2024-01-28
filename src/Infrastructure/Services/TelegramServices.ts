@@ -2,6 +2,8 @@ import TelegramBot from 'node-telegram-bot-api';
 
 import { ITelegramServices } from "../../Domain/ITelegramServices";
 import { ScrapingData } from '../Types/WebScrapingRepository.type';
+import { TelegramBotIdException } from '../../Domain/Exceptions/TelegramBotIdException';
+import { TelegramChatIdException } from '../../Domain/Exceptions/TelegramChatIdException';
 
 export class TelegramServices implements ITelegramServices {
 
@@ -13,9 +15,15 @@ export class TelegramServices implements ITelegramServices {
         this.botId = process.env.TL_BOT_ID || '';
         this.chatId = process.env.TL_CHAT_ID || '';
         
-        if ( this.botId !== '' ) {
-            this.telegramBot = new TelegramBot(this.botId);
+        if (this.botId === '') {
+            throw new TelegramBotIdException();
         }
+
+        if ( this.chatId === '' ) {
+            throw new TelegramChatIdException();
+        }
+
+        this.telegramBot = new TelegramBot(this.botId);
     }
 
     /**

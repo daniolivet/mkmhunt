@@ -28,8 +28,8 @@ export class GetCardOffersUseCase {
         let jsonData: SearchesJson = this.searcherJsonRepository.getJsonData();
         let currentDate: Date = this.dateTimeServices.getCurrentDate();
         let currentDateISOString: string = currentDate.toISOString();
-        
-        for( let card of jsonData.cards ){
+
+        for (let card of jsonData.cards) {
             this.scrapingData = await this.webScrapingRepository.getData(card.url);
             let sellerCountryFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'sellerCountry');
             let languageFilterIsActive: boolean = this.ensureFilterIsActive(card.url, 'language');
@@ -38,7 +38,7 @@ export class GetCardOffersUseCase {
 
             let hoursDiff: number = this.dateTimeServices.getDifferenceInHours(this.dateTimeServices.getCurrentDate(), new Date(cardUpdated.updated ?? ''));
 
-            if ( !sellerCountryFilterIsActive && !languageFilterIsActive ) {
+            if (!sellerCountryFilterIsActive && !languageFilterIsActive) {
                 this.checkCardCoincidence(card, jsonData, hoursDiff);
                 continue;
             }

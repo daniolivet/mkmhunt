@@ -19,23 +19,31 @@ import { IDateTimeServices } from './Domain/IDateTimeServices';
 import { ILoggerServices } from './Domain/ILoggerServices';
 import { LoggerServices } from './Infrastructure/Services/LoggerServices';
 
-// Services
-const telegramServices: ITelegramServices = new TelegramServices();
-const dateTimeServices: IDateTimeServices = new DateTimeServices();
 const loggerServices: ILoggerServices = new LoggerServices();
 
-// Repositories
-const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
-const searchesJsonRepository: ISearchesJsonRepository = new SearchesJsonRepository();
+try {
 
-// Use cases
-const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(
-    webScrapingRepository,
-    searchesJsonRepository,
-    telegramServices,
-    dateTimeServices,
-    loggerServices
-);
-const controller: IController = new GetCardOffersController(getCardOffersUseCase);
+    // Services
+    const telegramServices: ITelegramServices = new TelegramServices();
+    const dateTimeServices: IDateTimeServices = new DateTimeServices();
 
-controller.execute();
+    // Repositories
+    const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
+    const searchesJsonRepository: ISearchesJsonRepository = new SearchesJsonRepository();
+
+    // Use cases
+    const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(
+        webScrapingRepository,
+        searchesJsonRepository,
+        telegramServices,
+        dateTimeServices,
+        loggerServices
+    );
+    const controller: IController = new GetCardOffersController(getCardOffersUseCase);
+
+    controller.execute();
+
+} catch (error: any) {
+    let err = error as Error;
+    loggerServices.logError('Something went wrong: ' + err.message);
+}
