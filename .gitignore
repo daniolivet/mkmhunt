@@ -3,3 +3,4 @@ node_modules/
 searches.json
 dist/
 .env
+logs/
