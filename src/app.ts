@@ -16,10 +16,13 @@ import { SearchesJsonRepository } from './Infrastructure/Repository/SearchesJson
 import { ISearchesJsonRepository } from './Domain/ISearchesJsonRepository';
 import { DateTimeServices } from './Infrastructure/Services/DateTimeServices';
 import { IDateTimeServices } from './Domain/IDateTimeServices';
+import { ILoggerServices } from './Domain/ILoggerServices';
+import { LoggerServices } from './Infrastructure/Services/LoggerServices';
 
 // Services
 const telegramServices: ITelegramServices = new TelegramServices();
 const dateTimeServices: IDateTimeServices = new DateTimeServices();
+const loggerServices: ILoggerServices = new LoggerServices();
 
 // Repositories
 const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
@@ -30,7 +33,8 @@ const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(
     webScrapingRepository,
     searchesJsonRepository,
     telegramServices,
-    dateTimeServices
+    dateTimeServices,
+    loggerServices
 );
 const controller: IController = new GetCardOffersController(getCardOffersUseCase);
 

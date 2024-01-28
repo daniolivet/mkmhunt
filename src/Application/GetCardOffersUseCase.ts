@@ -7,6 +7,7 @@ import {
     TargetCardData
 } from "../Infrastructure/Types/SearchesJson.types";
 import { ScrapingData } from "../Infrastructure/Types/WebScrapingRepository.type";
+import { ILoggerServices } from "../Domain/ILoggerServices";
 
 export class GetCardOffersUseCase {
 
@@ -16,11 +17,14 @@ export class GetCardOffersUseCase {
         private readonly webScrapingRepository: IWebScrapingRepository,
         private readonly searcherJsonRepository: ISearchesJsonRepository,
         private readonly telegramServices: ITelegramServices,
-        private readonly dateTimeServices: IDateTimeServices
+        private readonly dateTimeServices: IDateTimeServices,
+        private readonly loggerServices: ILoggerServices
     ){}
 
     public async execute(): Promise<void>
     {   
+        this.loggerServices.logInfo('Starting to look for a card coincidences...');
+
         let jsonData: SearchesJson = this.searcherJsonRepository.getJsonData();
         let currentDate: Date = this.dateTimeServices.getCurrentDate();
         let currentDateISOString: string = currentDate.toISOString();
@@ -40,9 +44,12 @@ export class GetCardOffersUseCase {
             }
 
             if (parseFloat(this.scrapingData.lowestPrice) <= parseFloat(card.price) && hoursDiff > 2) {
+                this.loggerServices.logInfo(`Coincidence found :)`);
                 this.sendCoincidenceMessage(card, jsonData, this.scrapingData.lowestPrice);
             }
         };
+
+        this.loggerServices.logInfo(`Execution finished!`);
     }
 
     /**
@@ -52,10 +59,11 @@ export class GetCardOffersUseCase {
      * @param jsonData 
      * @param hoursDiff 
      */
-    private checkCardCoincidence(card: any, jsonData: SearchesJson, hoursDiff: number): void {
+    private checkCardCoincidence(card: TargetCardData, jsonData: SearchesJson, hoursDiff: number): void {
         let coincidence: number = this.getCardCoincidence(card);
 
         if (hoursDiff > 2 && coincidence !== -1) {
+            this.loggerServices.logInfo(`Coincidence found :)`);
             this.sendCoincidenceMessage(card, jsonData, this.scrapingData.prices[coincidence]);
         }
     }
@@ -68,7 +76,7 @@ export class GetCardOffersUseCase {
      * @param currentDateISOString 
      * @returns TargetCardData
      */
-    private updateCard(card: any, jsonData: SearchesJson, currentDateISOString: string): TargetCardData {
+    private updateCard(card: TargetCardData, jsonData: SearchesJson, currentDateISOString: string): TargetCardData {
         if (!card.updated) {
             card.updated = currentDateISOString;
             this.searcherJsonRepository.setData(jsonData);
@@ -120,6 +128,7 @@ export class GetCardOffersUseCase {
     private sendCoincidenceMessage(card: TargetCardData, jsonData: SearchesJson, prices: string): void { 
         card.updated = this.dateTimeServices.getCurrentDate().toISOString();
         this.searcherJsonRepository.setData(jsonData);
+        this.loggerServices.logInfo('Sending Telegram message...');
         this.telegramServices.sendMessage(this.telegramServices.getMessage(this.scrapingData, card.url, prices));
     }
 }
