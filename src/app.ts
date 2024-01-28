@@ -28,8 +28,12 @@ try {
     const dateTimeServices: IDateTimeServices = new DateTimeServices();
 
     // Repositories
-    const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository();
-    const searchesJsonRepository: ISearchesJsonRepository = new SearchesJsonRepository();
+    const webScrapingRepository: IWebScrapingRepository = new WebScrapingRepository(
+        loggerServices
+    );
+    const searchesJsonRepository: ISearchesJsonRepository = new SearchesJsonRepository(
+        loggerServices
+    );
 
     // Use cases
     const getCardOffersUseCase: GetCardOffersUseCase = new GetCardOffersUseCase(

@@ -4,10 +4,15 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth';
 
 import { ScrapingData } from '../Types/WebScrapingRepository.type';
 import { IWebScrapingRepository } from '../../Domain/IWebScrapingRepository';
+import { ILoggerServices } from '../../Domain/ILoggerServices';
 
 puppeteer.use(StealthPlugin());
 
 export class WebScrapingRepository implements IWebScrapingRepository {
+
+    constructor(
+        private readonly loggerServices:ILoggerServices
+    ) {}
 
     /**
      * Get data from the web page doing Scraping method.
@@ -39,8 +44,9 @@ export class WebScrapingRepository implements IWebScrapingRepository {
             };
 
         } catch (error) {
-            console.error('Error:', error);
-            return Promise.reject(error);
+            let err = error as Error;
+            this.loggerServices.logError('Something went wrong: ' + err.message);
+            return Promise.reject(err);
         }
     }
 
